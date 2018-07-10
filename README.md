@@ -22,7 +22,7 @@ See the docs [here](https://godoc.org/github.com/c3systems/merkletree).
 
 #### Install
 ```
-go get github.com/cbergoon/merkletree
+go get github.com/c3systems/merkletree
 ```
 
 #### Example Usage

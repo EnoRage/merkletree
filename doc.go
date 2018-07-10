@@ -17,8 +17,8 @@ Creating a new merkletree requires that the type that the tree will be construct
 from implements the Content interface.
 
 	type Content interface {
-		CalculateHash() []byte
-		Equals(other Content) bool
+		CalculateHashBytes() ([]byte, error)
+		Equals(other Content) (bool, error)
 	}
 
 A slice of the Content items should be created and then passed to the NewTree method.
