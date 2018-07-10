@@ -89,10 +89,10 @@ func main() {
     log.Fatal(err)
   }
 
-	log.Println("Verify Content: ", vc)
+  log.Println("Verify Content: ", vc)
 
-	//String representation
-	log.Println(t)
+  //String representation
+  log.Println(t)
 }
 
 ```
