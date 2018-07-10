@@ -58,33 +58,32 @@ func (t TestContent) Equals(other merkletree.Content) (bool, error) {
 }
 
 func main() {
+  //Build list of Content to build tree
+  var list []merkletree.Content
+  list = append(list, TestContent{x: "Hello"})
+  list = append(list, TestContent{x: "Hi"})
+  list = append(list, TestContent{x: "Hey"})
+  list = append(list, TestContent{x: "Hola"})
 
-	//Build list of Content to build tree
-	var list []merkletree.Content
-	list = append(list, TestContent{x: "Hello"})
-	list = append(list, TestContent{x: "Hi"})
-	list = append(list, TestContent{x: "Hey"})
-	list = append(list, TestContent{x: "Hola"})
-
-	//Create a new Merkle Tree from the list of Content
-	t, err := merkletree.NewTree(list)
+  //Create a new Merkle Tree from the list of Content
+  t, err := merkletree.NewTree(list)
   if err != nil {
     log.Fatal(err)
   }
 
-	//Get the Merkle Root of the tree
-	mr := t.MerkleRoot()
-	log.Println(mr)
+  //Get the Merkle Root of the tree
+  mr := t.MerkleRoot()
+  log.Println(mr)
 
-	//Verify the entire tree (hashes for each node) is valid
-	vt, err := t.VerifyTree()
+  //Verify the entire tree (hashes for each node) is valid
+  vt, err := t.VerifyTree()
   if err != nil {
     log.Fatal(err)
   }
-	fmt.Println("Verify Tree: ", vt)
+  log.Println("Verify Tree: ", vt)
 
-	//Verify a specific content in in the tree
-	vc, err := t.VerifyContent(t.MerkleRoot(), list[0])
+  //Verify a specific content in in the tree
+  vc, err := t.VerifyContent(t.MerkleRoot(), list[0])
   if err != nil {
     log.Fatal(err)
   }
