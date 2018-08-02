@@ -5,9 +5,9 @@ package merkletree
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"errors"
 	"fmt"
+	"github.com/miguelmota/go-solidity-sha3"
 )
 
 //Content represents the data that is stored and verified by the tree. A type that
@@ -53,12 +53,11 @@ func (n *Node) verifyNode() ([]byte, error) {
 		return nil, err
 	}
 
-	h := sha256.New()
-	if _, err := h.Write(append(leftBytes, rightBytes...)); err != nil {
-		return nil, err
-	}
+	hash := solsha3.SoliditySHA3(
+		solsha3.Bytes32(append(leftBytes, rightBytes...)),
+	)
 
-	return h.Sum(nil), nil
+	return hash, nil
 }
 
 //calculateNodeHash is a helper function that calculates the hash of the node.
@@ -67,12 +66,11 @@ func (n *Node) calculateNodeHash() ([]byte, error) {
 		return n.C.CalculateHashBytes()
 	}
 
-	h := sha256.New()
-	if _, err := h.Write(append(n.Left.Hash, n.Right.Hash...)); err != nil {
-		return nil, err
-	}
+	hash := solsha3.SoliditySHA3(
+		solsha3.Bytes32(append(n.Left.Hash, n.Right.Hash...)),
+	)
 
-	return h.Sum(nil), nil
+	return hash, nil
 }
 
 //NewTree creates a new Merkle Tree using the content cs.
@@ -131,19 +129,22 @@ func buildWithContent(cs []Content) (*Node, []*Node, error) {
 func buildIntermediate(nl []*Node) (*Node, error) {
 	var nodes []*Node
 	for i := 0; i < len(nl); i += 2 {
-		h := sha256.New()
-		var left, right int = i, i + 1
+		//h := sha256.New()
+		var left, right int = i, i+1
 		if i+1 == len(nl) {
 			right = i
 		}
 		chash := append(nl[left].Hash, nl[right].Hash...)
-		if _, err := h.Write(chash); err != nil {
-			return nil, err
-		}
+		hh := solsha3.SoliditySHA3(
+			solsha3.Bytes32(chash),
+		)
+		//if _, err := h.Write(chash); err != nil {
+		//	return nil, err
+		//}
 		n := &Node{
 			Left:  nl[left],
 			Right: nl[right],
-			Hash:  h.Sum(nil),
+			Hash:  hh,
 		}
 		nodes = append(nodes, n)
 		nl[left].Parent = n
@@ -218,7 +219,7 @@ func (m *MerkleTree) VerifyContent(content Content) (bool, error) {
 		if ok {
 			currentParent := l.Parent
 			for currentParent != nil {
-				h := sha256.New()
+				//h := sha256.New()
 				rightBytes, err := currentParent.Right.calculateNodeHash()
 				if err != nil {
 					return false, err
@@ -229,18 +230,16 @@ func (m *MerkleTree) VerifyContent(content Content) (bool, error) {
 					return false, err
 				}
 				if currentParent.Left.leaf && currentParent.Right.leaf {
-					if _, err := h.Write(append(leftBytes, rightBytes...)); err != nil {
-						return false, err
-					}
-					if bytes.Compare(h.Sum(nil), currentParent.Hash) != 0 {
+					//if _, err := h.Write(append(leftBytes, rightBytes...)); err != nil {
+					//	return false, err
+					//}
+					if bytes.Compare(solsha3.SoliditySHA3(solsha3.Bytes32(append(leftBytes, rightBytes...)),), currentParent.Hash) != 0 {
 						return false, nil
 					}
 					currentParent = currentParent.Parent
 				} else {
-					if _, err := h.Write(append(leftBytes, rightBytes...)); err != nil {
-						return false, err
-					}
-					if bytes.Compare(h.Sum(nil), currentParent.Hash) != 0 {
+
+					if bytes.Compare(solsha3.SoliditySHA3(solsha3.Bytes32(append(leftBytes, rightBytes...)),), currentParent.Hash) != 0 {
 						return false, nil
 					}
 					currentParent = currentParent.Parent
